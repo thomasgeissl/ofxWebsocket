@@ -19,7 +19,7 @@ namespace ofxWebsocket
     {
     public:
         typedef websocketpp::client<websocketpp::config::asio_client> client;
-        typedef websocketpp::connection_hdl Connection;
+        typedef websocketpp::connection_hdl ConnectionHandle;
         void setup(std::string host, int port)
         {
             try
@@ -57,7 +57,7 @@ namespace ofxWebsocket
                 // Start the ASIO io_service run loop
                 // this will cause a single connection to be made to the server. c.run()
                 // will exit when this connection is closed.
-                // c.run();
+                // _client.run();
                 _networkThread = std::thread(&client::run, &_client);
             }
             catch (websocketpp::exception const &e)
@@ -67,9 +67,9 @@ namespace ofxWebsocket
         }
         void send(std::string payload)
         {
-            send(_connection, payload);
+            send(_connectionHandle, payload);
         }
-        void send(Connection con, std::string payload)
+        void send(ConnectionHandle con, std::string payload)
         {
             websocketpp::lib::error_code ec;
             _client.send(con, payload, websocketpp::frame::opcode::text, ec);
@@ -77,6 +77,9 @@ namespace ofxWebsocket
             {
                 std::cout << "Echo failed because: " << ec.message() << std::endl;
             }
+        }
+        void close()
+        {
         }
         void addListener(Listener *listener)
         {
@@ -91,7 +94,7 @@ namespace ofxWebsocket
         }
         void on_open(websocketpp::connection_hdl hdl)
         {
-            _connection = hdl;
+            _connectionHandle = hdl;
             _client.send(hdl, "opened", websocketpp::frame::opcode::text);
             ofNotifyEvent(_openEvent, hdl, this);
         }
@@ -113,10 +116,10 @@ namespace ofxWebsocket
         }
 
         client _client;
-        Connection _connection;
         std::thread _networkThread;
+        ConnectionHandle _connectionHandle;
         ofEvent<Message> _messageEvent;
-        ofEvent<Connection> _openEvent;
-        ofEvent<Connection> _closeEvent;
+        ofEvent<ConnectionHandle> _openEvent;
+        ofEvent<ConnectionHandle> _closeEvent;
     };
 }; // namespace ofxWebsocket

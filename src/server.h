@@ -17,6 +17,7 @@ namespace ofxWebsocket
     {
     public:
         typedef websocketpp::server<websocketpp::config::asio> server;
+        typedef websocketpp::connection_hdl ConnectionHandle;
         ~Server()
         {
             stop();
@@ -31,8 +32,8 @@ namespace ofxWebsocket
                 // _server.set_socket_init_handler(bind(&type::on_socket_init,this,::_1));
                 //_server.set_tls_init_handler(bind(&type::on_tls_init,this,::_1));
                 _server.set_message_handler(bind(&Server::on_message, this, &_server, ::_1, ::_2));
-                // _server.set_open_handler(bind(&Server::on_open, this, &_server, ::_1));
-                // _server.set_close_handler(bind(&Server::on_close, this, &_server, ::_1));
+                _server.set_open_handler(bind(&Server::on_open, this, ::_1));
+                _server.set_close_handler(bind(&Server::on_close, this, ::_1));
                 // _server.set_fail_handler(bind(&type::on_fail, this, ::_1));
                 _server.listen(port);
                 _server.start_accept();
@@ -59,15 +60,9 @@ namespace ofxWebsocket
         void addListener(Listener *listener)
         {
             ofAddListener(_messageEvent, listener, &Listener::onMessage);
+            ofAddListener(_openEvent, listener, &Listener::onOpen);
+            ofAddListener(_closeEvent, listener, &Listener::onClose);
         }
-
-        void on_message(server *s, websocketpp::connection_hdl hdl, message_ptr msg)
-        {
-            Message message(hdl, msg->get_payload(), msg->get_opcode());
-            ofNotifyEvent(_messageEvent, message, this);
-            return;
-        }
-
         void send(websocketpp::connection_hdl connection, std::string payload, websocketpp::frame::opcode::value opCode)
         {
             try
@@ -79,9 +74,43 @@ namespace ofxWebsocket
                 ofLogError("ofxWebsocket::Server") << "could not send message.: " << e.what();
             }
         }
+
+        int getNumberOfConnectionHandles()
+        {
+            return _connectionHandles.size();
+        }
+        std::vector<ConnectionHandle> getConnectionHandles()
+        {
+            return _connectionHandles;
+        }
+        void on_message(server *s, websocketpp::connection_hdl hdl, message_ptr msg)
+        {
+            Message message(hdl, msg->get_payload(), msg->get_opcode());
+            ofNotifyEvent(_messageEvent, message, this);
+            return;
+        }
+        void on_open(websocketpp::connection_hdl hdl)
+        {
+            _connectionHandles.push_back(hdl);
+            ofNotifyEvent(_openEvent, hdl, this);
+        }
+        void on_close(websocketpp::connection_hdl hdl)
+        {
+            // auto it = std::find(_connectionHandles.begin(), _connectionHandles.end(), hdl);
+            // if (it != _connectionHandles.end())
+            // {
+            //     _connectionHandles.erase(it);
+            // }
+
+            ofNotifyEvent(_closeEvent, hdl, this);
+        }
+
         server _server;
-        ofEvent<Message> _messageEvent;
         std::thread _networkThread;
+        ofEvent<Message> _messageEvent;
+        ofEvent<ConnectionHandle> _openEvent;
+        ofEvent<ConnectionHandle> _closeEvent;
+        std::vector<websocketpp::connection_hdl> _connectionHandles;
     };
 
 }; // namespace ofxWebsocket

@@ -17,14 +17,13 @@ namespace ofxWebsocket
     class Listener
     {
     public:
-        typedef websocketpp::connection_hdl Connection;
         virtual void onMessage(Message &msg)
         {
         }
-        virtual void onOpen(Connection &con)
+        virtual void onOpen(websocketpp::connection_hdl &hdl)
         {
         }
-        virtual void onClose(Connection &con)
+        virtual void onClose(websocketpp::connection_hdl &hdl)
         {
         }
     };

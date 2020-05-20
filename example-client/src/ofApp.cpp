@@ -30,14 +30,16 @@ void ofApp::keyReleased(int key)
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y)
 {
+    ofJson payload;
+    payload["type"] = "MOUSEMOVED";
+    payload["x"] = (float)(x) / ofGetWidth();
+    payload["y"] = (float)(y) / ofGetHeight();
+    _client.send(payload.dump());
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button)
 {
-    std::string payload = "mouse dragged: (";
-    payload += ofToString(x) + ", " + ofToString(y) + ")";
-    _client.send(payload);
 }
 
 //--------------------------------------------------------------
@@ -79,12 +81,12 @@ void ofApp::onMessage(ofxWebsocket::Message &msg)
 {
     ofLogNotice() << "got message " << msg.getPayload();
 }
-void ofApp::onOpen(ofxWebsocket::Connection &con)
+void ofApp::onOpen(ofxWebsocket::ConnectionHandle &hdl)
 {
     ofLogNotice() << "connection opened";
     _client.send("hello from the ofApp");
 }
-void ofApp::onClose(ofxWebsocket::Connection &con)
+void ofApp::onClose(ofxWebsocket::ConnectionHandle &hdl)
 {
     ofLogNotice() << "connection closed";
 }

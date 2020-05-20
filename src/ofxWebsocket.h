@@ -6,5 +6,5 @@
 
 namespace ofxWebsocket
 {
-    typedef websocketpp::connection_hdl Connection;
+    typedef websocketpp::connection_hdl ConnectionHandle;
 };

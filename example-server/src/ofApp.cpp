@@ -16,6 +16,20 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
+    auto x = 60;
+    auto y = 60;
+    for (auto i = 0; i < _server.getNumberOfConnectionHandles(); i++)
+    {
+        ofSetColor(ofColor::pink);
+        ofDrawCircle(x, y, 20);
+        x += 40;
+    }
+
+    if (_server.getNumberOfConnectionHandles() > 0)
+    {
+        ofSetColor(ofColor::lightYellow);
+        ofDrawCircle(_remoteX * ofGetWidth(), _remoteY * ofGetHeight(), 12);
+    }
 }
 
 //--------------------------------------------------------------
@@ -75,6 +89,22 @@ void ofApp::dragEvent(ofDragInfo dragInfo)
 
 void ofApp::onMessage(ofxWebsocket::Message &msg)
 {
-    ofLogNotice() << "get message " << msg.getPayload();
-    _server.send(msg.getConnection(), msg.getPayload(), msg.getOpCode());
+    ofLogNotice() << "got message " << msg.getPayload();
+    _server.send(msg.getConnectionHandle(), msg.getPayload(), msg.getOpCode());
+
+    auto payload = msg.getPayload();
+    if (ofJson::accept(payload))
+    {
+        auto data = ofJson::parse(payload);
+        _remoteX = data["x"];
+        _remoteY = data["y"];
+    }
+}
+void ofApp::onOpen(ofxWebsocket::ConnectionHandle &hdl)
+{
+    ofLogNotice() << "connection opened";
+}
+void ofApp::onClose(ofxWebsocket::ConnectionHandle &hdl)
+{
+    ofLogNotice() << "connection closed";
 }

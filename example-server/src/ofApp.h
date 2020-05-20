@@ -24,6 +24,9 @@ public:
     void gotMessage(ofMessage msg);
 
     void onMessage(ofxWebsocket::Message &msg);
+    void onOpen(ofxWebsocket::ConnectionHandle &hdl);
+    void onClose(ofxWebsocket::ConnectionHandle &hdl);
 
     ofxWebsocket::Server _server;
+    float _remoteX, _remoteY;
 };

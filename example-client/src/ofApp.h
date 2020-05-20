@@ -24,8 +24,8 @@ public:
     void gotMessage(ofMessage msg);
 
     void onMessage(ofxWebsocket::Message &msg);
-    void onOpen(ofxWebsocket::Connection &con);
-    void onClose(ofxWebsocket::Connection &con);
+    void onOpen(ofxWebsocket::ConnectionHandle &hdl);
+    void onClose(ofxWebsocket::ConnectionHandle &hdl);
 
     ofxWebsocket::Client _client;
 };

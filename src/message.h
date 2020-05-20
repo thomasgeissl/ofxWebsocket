@@ -15,12 +15,12 @@ namespace ofxWebsocket
     class Message
     {
     public:
-        Message(websocketpp::connection_hdl connection, std::string payload, websocketpp::frame::opcode::value opCode) : _connection(connection), _payload(payload), _opCode(opCode)
+        Message(websocketpp::connection_hdl hdl, std::string payload, websocketpp::frame::opcode::value opCode) : _connectionHandle(hdl), _payload(payload), _opCode(opCode)
         {
         }
-        websocketpp::connection_hdl getConnection()
+        websocketpp::connection_hdl getConnectionHandle()
         {
-            return _connection;
+            return _connectionHandle;
         }
 
         std::string getPayload()
@@ -32,7 +32,7 @@ namespace ofxWebsocket
         {
             return _opCode;
         }
-        websocketpp::connection_hdl _connection;
+        websocketpp::connection_hdl _connectionHandle;
         std::string _payload;
         websocketpp::frame::opcode::value _opCode;
     };
